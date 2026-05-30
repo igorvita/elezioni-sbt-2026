@@ -694,7 +694,7 @@ function showSezioneDetail(){
     for(let ln=1;ln<=14;ln++){
       const v=slRow['L'+ln]||0;
       const col=CC[LISTS[ln]?.coalition]||'#888';
-      html+=`<span style="font-family:'DM Mono',monospace;font-size:.7rem;padding:.1rem .38rem;border-radius:3px;background:${col}22;color:${col};border:1px solid ${col}44">L${ln}: ${v}</span>`;
+      html+=`<span style="font-family:'DM Mono',monospace;font-size:.7rem;padding:.1rem .38rem;border-radius:3px;background:${col}22;color:${col};border:1px solid ${col}44;cursor:pointer;text-decoration:underline;text-underline-offset:2px" onclick="openListModal(${ln})" title="Apri dettaglio Lista ${ln}">L${ln}: ${v}</span>`;
     }
     html+=`</div>`;
   }
