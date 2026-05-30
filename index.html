@@ -168,6 +168,40 @@ select:focus{border-color:var(--gray-400)}
 .aff-v{font-family:"Playfair Display",serif;font-size:.95rem;font-weight:700}
 .aff-pct{font-size:.62rem;margin-top:.04rem;opacity:.7}
 
+
+/* LIST MODAL */
+.list-modal-overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:200;backdrop-filter:blur(4px);align-items:flex-end;justify-content:center;padding:0}
+@media(min-width:600px){.list-modal-overlay{align-items:center;padding:1rem}}
+.list-modal-overlay.open{display:flex}
+.list-modal{background:white;border-radius:16px 16px 0 0;max-width:720px;width:100%;max-height:92vh;overflow-y:auto;box-shadow:0 -8px 40px rgba(0,0,0,.18)}
+@media(min-width:600px){.list-modal{border-radius:16px;max-height:88vh}}
+.lm-handle{width:36px;height:4px;background:var(--gray-300);border-radius:2px;margin:.85rem auto .5rem;display:block}
+@media(min-width:600px){.lm-handle{display:none}}
+.lm-header{padding:0 1.3rem .85rem;border-bottom:1px solid var(--gray-100);position:relative}
+.lm-title{font-family:"Playfair Display",serif;font-size:1.2rem;font-weight:700;line-height:1.2;margin-bottom:.4rem;padding-right:2rem}
+.lm-meta{display:flex;gap:.4rem;flex-wrap:wrap;align-items:center}
+.lm-body{padding:1.25rem}
+.lm-close{position:absolute;top:.1rem;right:.9rem;background:var(--gray-100);border:none;border-radius:7px;width:29px;height:29px;cursor:pointer;font-size:.85rem;display:flex;align-items:center;justify-content:center;color:var(--gray-600)}
+.lm-close:hover{background:var(--gray-200)}
+.lm-stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:.65rem;margin-bottom:1.3rem}
+.lm-stat-box{background:var(--gray-50);border-radius:8px;padding:.8rem;text-align:center}
+.lm-stat-val{font-family:"Playfair Display",serif;font-size:1.35rem;font-weight:700}
+.lm-stat-lab{font-size:.66rem;color:var(--gray-500);margin-top:.18rem;line-height:1.3}
+.lm-sez-label{font-weight:600;font-size:.8rem;margin-bottom:.6rem;color:var(--gray-700)}
+.lm-sez-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:.28rem}
+.lm-sez-cell{border-radius:5px;padding:.32rem;text-align:center;border:1px solid var(--gray-100)}
+.lm-sez-n{font-family:"DM Mono",monospace;font-size:.57rem;color:var(--gray-400)}
+.lm-sez-v{font-family:"DM Mono",monospace;font-weight:600;font-size:.78rem}
+.lm-chart{display:grid;gap:.3rem;margin-bottom:1.3rem}
+.lm-bar-row{display:flex;align-items:center;gap:.6rem}
+.lm-bar-sez{font-family:"DM Mono",monospace;font-size:.68rem;color:var(--gray-500);width:46px;flex-shrink:0;text-align:right}
+.lm-bar-track{flex:1;height:14px;background:var(--gray-100);border-radius:3px;overflow:hidden;position:relative}
+.lm-bar-fill{height:100%;border-radius:3px;transition:width .3s}
+.lm-bar-val{font-family:"DM Mono",monospace;font-size:.7rem;font-weight:600;min-width:28px;text-align:right;flex-shrink:0}
+.lm-tabs{display:flex;gap:0;border-bottom:1px solid var(--gray-200);margin-bottom:1.1rem}
+.lm-tab{padding:.55rem 1rem;font-size:.8rem;font-weight:500;color:var(--gray-500);background:none;border:none;border-bottom:2.5px solid transparent;cursor:pointer;font-family:"DM Sans",sans-serif;white-space:nowrap}
+.lm-tab.active{color:var(--ink);border-bottom-color:var(--ink);font-weight:600}
+
 /* MODAL */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:200;backdrop-filter:blur(4px);align-items:flex-end;justify-content:center;padding:0}
 @media(min-width:600px){.modal-overlay{align-items:center;padding:1rem}}
@@ -454,7 +488,7 @@ function buildOverview(){
     const col=CC[l.coalition]||'#888';
     const pct=(l.official_votes/totalVotiLista*100).toFixed(1);
     const pref=CANDIDATES.filter(c=>c.list_num===l.list_num).reduce((s,c)=>s+c.total,0);
-    lb.innerHTML+=`<div class="list-bar-row" onclick="goToList(${l.list_num})">
+    lb.innerHTML+=`<div class="list-bar-row" onclick="openListModal(${l.list_num})" title="Clicca per vedere i voti per sezione &bull; tasto Candidati per la lista completa">
       <div class="list-bar-num">L.${l.list_num}</div>
       <div class="list-bar-inner">
         <div class="list-bar-name">${l.list_name}</div>
@@ -569,11 +603,15 @@ function buildListsView(){
     const col=CC[l.coalition]||'#888';
     const pct=(l.official_votes/totalVotiLista*100).toFixed(1);
     const pref=CANDIDATES.filter(c=>c.list_num===l.list_num).reduce((s,c)=>s+c.total,0);
-    grid.innerHTML+=`<div class="list-card" data-coalition="${l.coalition}" onclick="showListDetail(${l.list_num})">
+    grid.innerHTML+=`<div class="list-card" data-coalition="${l.coalition}" onclick="openListModal(${l.list_num})">
       <div class="list-card-num">Lista ${l.list_num} &middot; ${l.coalition}</div>
       <div class="list-card-name">${l.list_name}</div>
       <div class="list-card-votes">${l.official_votes.toLocaleString('it-IT')}</div>
       <div class="list-card-sub">${pct}% voti lista &middot; ${pref.toLocaleString('it-IT')} preferenze</div>
+      <div style="margin-top:.5rem;font-size:.72rem;color:var(--gray-500);display:flex;gap:.75rem">
+        <span style="color:#2563eb;font-weight:500">&#9654; Voti per sezione</span>
+        <span onclick="event.stopPropagation();showListDetail(${l.list_num})" style="cursor:pointer;text-decoration:underline;text-underline-offset:2px">Candidati</span>
+      </div>
       <div class="list-card-bar"><div class="list-card-bar-fill" style="width:${(l.official_votes/maxLV*100).toFixed(1)}%;background:${col}"></div></div>
     </div>`;
   });
@@ -750,9 +788,104 @@ function closeModal(e){
   document.body.style.overflow='';
 }
 
+
+/* LIST MODAL */
+function openListModal(listNum){
+  const l=LISTS[listNum];
+  const col=CC[l.coalition]||'#888';
+  document.getElementById('lm-title').textContent=`Lista ${listNum} — ${l.list_name}`;
+  document.getElementById('lm-meta').innerHTML=`
+    <span class="list-badge">Lista ${listNum}</span>
+    <span class="badge ${({'Centro-Sinistra':'badge-cs','Lista Civica':'badge-lc','Centro-Destra':'badge-cd'})[l.coalition]||''}">${l.coalition}</span>
+    <span style="font-size:.74rem;color:var(--gray-500)">${l.sindaco}</span>`;
+
+  // Voti per sezione
+  const sezioniVotes={};
+  LISTS_SEZIONI.forEach(r=>{ sezioniVotes[r.sezione]=r['L'+listNum]||0; });
+  const maxV=Math.max(...Object.values(sezioniVotes));
+  const totalV=Object.values(sezioniVotes).reduce((s,v)=>s+v,0);
+  const topSez=Object.entries(sezioniVotes).sort((a,b)=>b[1]-a[1])[0];
+  const minSez=Object.entries(sezioniVotes).sort((a,b)=>a[1]-b[1])[0];
+  const rgb=col.match(/#(..)(..)(..)/).slice(1).map(h=>parseInt(h,16));
+
+  document.getElementById('lm-stats').innerHTML=`
+    <div class="lm-stat-box"><div class="lm-stat-val" style="color:${col}">${totalV.toLocaleString('it-IT')}</div><div class="lm-stat-lab">Voti totali ufficiali</div></div>
+    <div class="lm-stat-box"><div class="lm-stat-val">${topSez[1]}</div><div class="lm-stat-lab">Max &mdash; Sez. ${topSez[0]}</div></div>
+    <div class="lm-stat-box"><div class="lm-stat-val">${minSez[1]}</div><div class="lm-stat-lab">Min &mdash; Sez. ${minSez[0]}</div></div>`;
+
+  // Bars chart (sorted by sezione number)
+  let barsHtml='';
+  for(let i=1;i<=43;i++){
+    const v=sezioniVotes[i]||0;
+    const w=maxV>0?Math.round(v/maxV*100):0;
+    barsHtml+=`<div class="lm-bar-row">
+      <div class="lm-bar-sez">Sez. ${i}</div>
+      <div class="lm-bar-track"><div class="lm-bar-fill" style="width:${w}%;background:${col}"></div></div>
+      <div class="lm-bar-val">${v}</div>
+    </div>`;
+  }
+  document.getElementById('lm-chart').innerHTML=barsHtml;
+
+  // Grid (color intensity)
+  let gridHtml='';
+  for(let i=1;i<=43;i++){
+    const v=sezioniVotes[i]||0;
+    const alpha=maxV>0?(0.07+v/maxV*0.38).toFixed(2):0.07;
+    gridHtml+=`<div class="lm-sez-cell" style="background:rgba(${rgb[0]},${rgb[1]},${rgb[2]},${alpha})">
+      <div class="lm-sez-n">S.${i}</div><div class="lm-sez-v">${v}</div></div>`;
+  }
+  document.getElementById('lm-sez-grid').innerHTML=gridHtml;
+
+  // Reset to bars tab
+  switchLmTab('bars', document.querySelector('.lm-tab'));
+  document.getElementById('list-modal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function switchLmTab(tab, btn){
+  document.querySelectorAll('.lm-tab').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  document.getElementById('lm-tab-bars').style.display = tab==='bars' ? '' : 'none';
+  document.getElementById('lm-tab-grid').style.display = tab==='grid' ? '' : 'none';
+}
+
+function closeListModal(e){
+  if(e && e.target!==document.getElementById('list-modal')) return;
+  document.getElementById('list-modal').classList.remove('open');
+  document.body.style.overflow='';
+}
+
 /* INIT */
 buildOverview();buildSindaco();buildListsView();buildSezioniView();buildAffluenza();
 populateFilters();filterRanking();
 </script>
+
+<!-- LIST MODAL -->
+<div class="list-modal-overlay" id="list-modal" onclick="closeListModal(event)">
+  <div class="list-modal">
+    <span class="lm-handle"></span>
+    <div class="lm-header">
+      <div class="lm-title" id="lm-title"></div>
+      <div class="lm-meta" id="lm-meta"></div>
+      <button class="lm-close" onclick="closeListModal()">&#10005;</button>
+    </div>
+    <div class="lm-body">
+      <div class="lm-stat-row" id="lm-stats"></div>
+      <div class="lm-tabs">
+        <button class="lm-tab active" onclick="switchLmTab('bars',this)">Grafico per sezione</button>
+        <button class="lm-tab" onclick="switchLmTab('grid',this)">Griglia</button>
+      </div>
+      <div id="lm-tab-bars">
+        <div class="lm-sez-label">Voti per sezione (1&ndash;43)</div>
+        <div class="lm-chart" id="lm-chart"></div>
+      </div>
+      <div id="lm-tab-grid" style="display:none">
+        <div class="lm-sez-label">Voti per sezione (1&ndash;43)</div>
+        <div class="lm-sez-grid" id="lm-sez-grid"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
